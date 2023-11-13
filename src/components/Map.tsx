@@ -106,7 +106,7 @@ function MapComponent({ data }: Result) {
     }
   };
   return (
-    <div>
+    <div className="map-container">
       <div id="map" ref={mapElement} style={{ height: '500px' }} />
       <div id="popup">
         {popupContent.name && (

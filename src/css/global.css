@@ -1,20 +1,22 @@
-#popup {
+.map-container {
     position: relative;
-    top: -500px;
-    right: -50%;  
+}
+#popup {
+    position: absolute;
+    top: 0.5em;
+    right: 0.5em;  
     width: 50%;
 }
 .popup-container {
     background-color: #fff;
     padding: 1rem;
-    opacity: 0.8;
     margin: 0;
     height: 100%;   
-    -webkit-box-shadow: -3px 3px 5px -2px rgba(0,0,0,0.7); 
-    box-shadow: -3px 3px 5px -2px rgba(0,0,0,0.7);  
-    border-radius: 0px 0px 0px 12px;
-    -webkit-border-radius: 0px 0px 0px 0.5rem;
-    -moz-border-radius: 0px 0px 0px 0.5rem;    
+    -webkit-box-shadow: -1px 1px 5px -2px rgba(0,0,0,0.7); 
+    box-shadow: -1px 1px 5px -2px rgba(0,0,0,0.7);  
+    border-radius: 0.25rem;
+    -webkit-border-radius: 0.25rem;
+    -moz-border-radius: 0.25rem;    
 }
 .popup-heading, .popup-mail, .popup-website, .popup-activities {
     display: flex;   
@@ -64,8 +66,7 @@
 /* X-Small devices (portrait phones, less than 576px) */
 @media (min-width: 576px) { 
     #popup {   
-        width: 40%;
-        right: -60%;  
+        width: 40%; 
     }  
     .popup-logo img {
         width: 25px;    
@@ -75,8 +76,7 @@
 /* Small devices (landscape phones, less than 768px) */
 @media (min-width: 768px) {
     #popup {   
-        width: 35%;
-        right: -65%;  
+        width: 35%; 
     }   
     .popup-logo img {
         width: 30px;    
@@ -93,7 +93,6 @@
 @media (min-width: 992px) { 
     #popup {   
         width: 30%;
-        right: -70%;  
     } 
     #popup .popup-ctext, #popup .popup-desc {
         font-size: 1rem;
@@ -106,8 +105,7 @@
 /* Large devices (desktops, less than 1200px) */
 @media (min-width: 1200px) { 
     #popup {   
-        width: 25%;
-        right: -75%;          
+        width: 25%;         
     }   
     .popup-logo img {
         width: 40px;    

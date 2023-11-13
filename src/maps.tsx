@@ -28,7 +28,7 @@ const Maps = () => {
         geoData === undefined && resData();
     }, []);
 
-    return ( <div className="map-container">{ geoData === undefined ? <LoadSpinner /> : <MapComponent data={ geoData } /> }</div> )
+    return geoData === undefined ? <LoadSpinner /> : <MapComponent data={ geoData } />
 }
 
 export default Maps
