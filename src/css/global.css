@@ -1,7 +1,7 @@
 #popup {
-    position: absolute;
-    top: 0;
-    right: 0;    
+    position: relative;
+    top: -500px;
+    right: -50%;  
     width: 50%;
 }
 .popup-container {
@@ -65,6 +65,7 @@
 @media (min-width: 576px) { 
     #popup {   
         width: 40%;
+        right: -60%;  
     }  
     .popup-logo img {
         width: 25px;    
@@ -75,6 +76,7 @@
 @media (min-width: 768px) {
     #popup {   
         width: 35%;
+        right: -65%;  
     }   
     .popup-logo img {
         width: 30px;    
@@ -91,6 +93,7 @@
 @media (min-width: 992px) { 
     #popup {   
         width: 30%;
+        right: -70%;  
     } 
     #popup .popup-ctext, #popup .popup-desc {
         font-size: 1rem;
@@ -104,6 +107,7 @@
 @media (min-width: 1200px) { 
     #popup {   
         width: 25%;
+        right: -75%;          
     }   
     .popup-logo img {
         width: 40px;    
