@@ -3,7 +3,8 @@ import React, { useEffect, useState } from 'react';
 import MapComponent from './components/Map'
 import GeoJsonFeatureCollectionType from './interfaces/geoJsonFeatureCollection';
 
-import LoadSpinner from './components/loadspinner'
+import LoadSpinner from './components/Loadspinner'
+import './css/global.css';
 
 interface Result {
     data: GeoJsonFeatureCollectionType;
