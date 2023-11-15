@@ -10,25 +10,42 @@ interface Result {
     data: GeoJsonFeatureCollectionType;
 };
 
+declare global {
+    interface Window {
+        mapconfig: any;
+    }
+}
+
 const Maps = () => {
 
-    const [geoData, setGeoData] = useState();
+    //get global config
+    const config = window.mapconfig;
 
-    const mapData = async () => {
-        const url = `https://dimb-api-20230512.netlify.app/api/igs?simplify=0.005`;
-        const result = await fetch(url);  
-        return await result.json();
-    }
-    const resData = async () => {
-        const fmapData = await mapData();
-        setGeoData( () => { return { ...fmapData } } );
-        console.log( 'MapData retrieved:', fmapData );
-    }
-    useEffect(() => {
-        geoData === undefined && resData();
-    }, []);
+    if ( config === undefined || config.length === 0 ) { 
+        console.log( '%c*** No configuration available ***', 'color:red;' );  
+        return <div>No Config loaded</div>
+    } else {
 
-    return geoData === undefined ? <LoadSpinner /> : <MapComponent data={ geoData } />
+        const [geoData, setGeoData] = useState();
+
+        const mapData = async () => {
+            const url = config.paths.api;
+            const result = await fetch(url);  
+            return await result.json();
+        }
+        const resData = async () => {
+            const fmapData = await mapData();
+            setGeoData( () => { return { ...fmapData } } );
+            console.log( 'MapData retrieved:', fmapData );
+        }
+        useEffect(() => {
+            geoData === undefined && resData();
+        }, []);
+
+        console.log( '%c*** map configuration loaded ***', 'color:green;' ); 
+
+        return geoData === undefined ? <LoadSpinner display="Lade Karte..." /> : <MapComponent data={ geoData }  settings={ config } />
+    }
 }
 
 export default Maps

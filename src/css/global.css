@@ -58,9 +58,17 @@
 .popup-close:after{
     text-align: right;
     display: block;
-    content: "\00d7"; /* This will render the 'X' */
+    content: "\00d7";
     margin-bottom: -1.5rem;
     cursor: pointer; 
+}
+.popup-close {
+    width: 20px;
+    position: absolute;
+    right: 1rem;
+}
+.popup-close:hover{
+    opacity: 0.5;
 }
 
 /* X-Small devices (portrait phones, less than 576px) */
