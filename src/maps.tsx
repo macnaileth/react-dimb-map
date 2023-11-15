@@ -23,7 +23,7 @@ const Maps = () => {
 
     if ( config === undefined || config.length === 0 ) { 
         console.log( '%c*** No configuration available ***', 'color:red;' );  
-        return <div>No Config loaded</div>
+        return <div style={{ display: 'none' }}>*** Map not displayed: No configuration available ***</div>
     } else {
 
         const [geoData, setGeoData] = useState();
@@ -36,7 +36,6 @@ const Maps = () => {
         const resData = async () => {
             const fmapData = await mapData();
             setGeoData( () => { return { ...fmapData } } );
-            console.log( 'MapData retrieved:', fmapData );
         }
         useEffect(() => {
             geoData === undefined && resData();

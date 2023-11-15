@@ -33,8 +33,6 @@ function MapComponent( { data, settings }: Result ) {
     const mapRef = useRef<Map>();
     mapRef.current = map;
 
-    console.log( 'Settings:', settings );
-
     useEffect(() => {
       if (mapElement.current) {
         const vectorLayer = new VectorLayer({
@@ -111,7 +109,7 @@ function MapComponent( { data, settings }: Result ) {
       }
     };
     return (
-      <div className="map-container">
+      <div className={ "map-container" + ( settings.addClasses === '' ? '' : ' ' + settings.addClasses ) }>
         <div id="map" ref={mapElement} style={{ height: settings.height + 'px' }} />
         <div id="popup">
           {popupContent.name && (
