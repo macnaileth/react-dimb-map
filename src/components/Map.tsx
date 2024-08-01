@@ -1,18 +1,21 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Map, View } from 'ol';
+import React, { useEffect, useState } from 'react';
+import { Map, View, Feature } from 'ol';
 import GeoJSON from 'ol/format/GeoJSON';
 import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer';
 import { OSM, Vector as VectorSource } from 'ol/source';
-import { transformExtent } from 'ol/proj';
-import { Style, Fill, Stroke } from 'ol/style';
-import Select from 'ol/interaction/Select.js';
+import { Select, defaults as defaultInteractions } from 'ol/interaction';
 import "ol/ol.css";
-import GeoJsonFeatureCollectionType from '../interfaces/geoJsonFeatureCollection';
 import Icons from './Icons';
+import MapStyles from './MapStyles';
+import GeolocationControl from './GeolocationControl';
+import SearchControl from './SearchControl';
+
 
 interface Result {
-    data: GeoJsonFeatureCollectionType;
     settings: any;
+    url: string;
+    controls: string[];
+    label: boolean;
 }
 
 interface PopupContent {
@@ -25,61 +28,67 @@ interface PopupContent {
     activities?: string[];
 }
 
-function MapComponent( { data, settings }: Result ) {
-    const [ map, setMap ] = useState<Map>();
+function MapComponent( { settings, url, controls, label }: Result ) {
     const [ popupContent, setPopupContent ] = useState<PopupContent>({});
 
-    const mapElement = useRef<HTMLDivElement>(null);
-    const mapRef = useRef<Map>();
-    mapRef.current = map;
-
     useEffect(() => {
-      if (mapElement.current) {
-        const vectorLayer = new VectorLayer({
-          source: new VectorSource({
-            features: new GeoJSON({ featureProjection: 'EPSG:3857' }).readFeatures(data),
+      const { labelStyle, polygonStyle, selectStyle, locationStyle } = MapStyles;
+      polygonStyle.getFill().setColor('rgba(' + settings.style.featFillRGB + ', ' + settings.style.featFillAlpha + ')');
+      polygonStyle.getStroke().setColor('rgb(' + settings.style.featStrokeRGB + ')');
+      polygonStyle.getStroke().setWidth(settings.style.featStrokeWidth);
+      const style = label ? [polygonStyle, labelStyle] : [polygonStyle];
+  
+      const source = new VectorSource({
+        format: new GeoJSON,
+        url,
+      });
+      
+      const vectorLayer = new VectorLayer({
+        source,
+        style: function (feature) {
+          const label = feature.get('name').split(' ').join('\n');
+          labelStyle.getText().setText(label);
+          return style;
+        },
+      });
+  
+      const selectInteraction = new Select({
+        style: selectStyle,
+      });
+  
+      const locationFeature = new Feature();
+      locationFeature.setStyle(locationStyle);
+  
+      const map = new Map({
+        target: 'map',
+        layers: [
+          new TileLayer({
+            source: new OSM(),
           }),
-          style: new Style({
-            fill: new Fill({
-              color: 'rgba(' + settings.style.featFillRGB + ', ' + settings.style.featFillAlpha + ')',
-            }),
-            stroke: new Stroke({
-              color: 'rgb(' + settings.style.featStrokeRGB + ')',
-              width: settings.style.featStrokeWidth,
-            }),
-          }),
-        });
-
-        const newMap = new Map({
-          target: mapElement.current,
-          layers: [
-            new TileLayer({
-              source: new OSM(),
-            }),
-            vectorLayer,
-          ],
-        });
-
-        const view: View = newMap.getView();
-        const { bbox } = data.properties;
-        const bboxTransformed = transformExtent(bbox, 'EPSG:4326', 'EPSG:3857');
-        view.fit(bboxTransformed, {
-          size: newMap.getSize()!,
-          padding: [50, 50, 50, 50],
-        });
-        newMap.on('click', handleMapClick);
-        setMap(newMap);
-
-        return () => {
-          newMap.setTarget('');
-        };
-      }
-    }, [data]);
-
-    const handleMapClick = (event: any): void => {
-      if (mapRef.current) {
-        const feature = mapRef.current.forEachFeatureAtPixel(event.pixel, (feature) => {
-            return feature;
+          vectorLayer,
+        ],
+        view: new View({
+          center: [0, 0],
+          zoom: 2,
+        }),
+        interactions: defaultInteractions().extend([selectInteraction]),
+      });
+  
+      source.once('change', () => {
+        if (source.getState() === 'ready') {
+          const extent = source.getExtent();
+  
+          if (!extent || extent[0] === Infinity) {
+            return;
+          }
+          map.getView().fit(extent, { padding: [50, 50, 50, 50] });
+          source.addFeature(locationFeature);
+        }
+      });
+  
+      map.on('click', (event: any): void => {
+        const feature = map.forEachFeatureAtPixel(event.pixel, (feature) => {
+          return feature;
         });
         if (feature) {
           const properties = feature.getProperties();
@@ -106,11 +115,24 @@ function MapComponent( { data, settings }: Result ) {
         } else {
           setPopupContent({});
         }
+      });
+  
+      if (controls.includes('locate')) {
+        map.addControl(new GeolocationControl(locationFeature));
       }
-    };
+  
+      if (controls.includes('search')) {
+        map.addControl(new SearchControl(locationFeature, settings.paths));
+      }
+    
+      return () => {
+        map.setTarget('');
+      };
+    }, [url, controls, label, settings]);
+
     return (
       <div className={ "map-container" + ( settings.addClasses === '' ? '' : ' ' + settings.addClasses ) }>
-        <div id="map" ref={mapElement} style={{ height: settings.height + 'px' }} />
+        <div id="map" style={{ height: settings.height + 'px' }} />
         <div id="popup">
           {popupContent.name && (
             <div className="popup-container">

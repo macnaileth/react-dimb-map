@@ -1,14 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 import MapComponent from './components/Map'
-import GeoJsonFeatureCollectionType from './interfaces/geoJsonFeatureCollection';
 
-import LoadSpinner from './components/Loadspinner'
 import './css/global.css';
-
-interface Result {
-    data: GeoJsonFeatureCollectionType;
-};
 
 declare global {
     interface Window {
@@ -26,24 +20,11 @@ const Maps = () => {
         return <div style={{ display: 'none' }}>*** Map not displayed: No configuration available ***</div>
     } else {
 
-        const [geoData, setGeoData] = useState();
-
-        const mapData = async () => {
-            const url = config.paths.api;
-            const result = await fetch(url);  
-            return await result.json();
-        }
-        const resData = async () => {
-            const fmapData = await mapData();
-            setGeoData( () => { return { ...fmapData } } );
-        }
-        useEffect(() => {
-            geoData === undefined && resData();
-        }, []);
+        const url = `${config.paths.baseUrl}/api/igs/?simplified=0.005`;
 
         console.log( '%c*** map configuration loaded ***', 'color:green;' ); 
 
-        return geoData === undefined ? <LoadSpinner display="Lade Karte..." /> : <MapComponent data={ geoData }  settings={ config } />
+        return <MapComponent url={ url }  settings={ config }  controls={['search', 'locate']}  label={false}  />
     }
 }
 

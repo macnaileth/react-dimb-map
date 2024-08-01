@@ -85,6 +85,9 @@ module.exports={
               use: ["style-loader", "css-loader"],
             },            
         ]
+    },
+    performance: {
+        hints: false,  // Can be 'warning', 'error', or false to disable hints
     }
 }
 
