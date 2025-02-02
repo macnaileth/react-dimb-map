@@ -130,6 +130,8 @@ function MapComponent( { settings, url, controls, label }: Result ) {
       };
     }, [url, controls, label, settings]);
 
+    //console.log( 'content:', popupContent );
+
     return (
       <div className={ "map-container" + ( settings.addClasses === '' ? '' : ' ' + settings.addClasses ) }>
         <div id="map" style={{ height: settings.height + 'px' }} />
@@ -140,7 +142,7 @@ function MapComponent( { settings, url, controls, label }: Result ) {
               <div className="popup-heading">
                   {popupContent.logo && (
                     <div className="popup-logo">
-                      <img src={popupContent.logo} alt={popupContent.name} />
+                      <img src={ popupContent.logo.replace("http://", "https://") } alt={popupContent.name} />
                     </div>
                   )}
                   <div className="popup-name">

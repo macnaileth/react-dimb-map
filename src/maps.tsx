@@ -20,7 +20,7 @@ const Maps = () => {
         return <div style={{ display: 'none' }}>*** Map not displayed: No configuration available ***</div>
     } else {
 
-        const url = `${config.paths.baseUrl}/api/igs/?simplified=0.005`;
+        const url = `${config.paths.baseUrl}/api/igs?simplified=0.004`;
 
         console.log( '%c*** map configuration loaded ***', 'color:green;' ); 
 
