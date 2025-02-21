@@ -9,6 +9,7 @@ import Icons from './Icons';
 import MapStyles from './MapStyles';
 import GeolocationControl from './GeolocationControl';
 import SearchControl from './SearchControl';
+import LoadSpinner from './LoadSpinner';
 
 
 interface Result {
@@ -30,6 +31,8 @@ interface PopupContent {
 
 function MapComponent( { settings, url, controls, label }: Result ) {
     const [ popupContent, setPopupContent ] = useState<PopupContent>({});
+    const [ isFetching, setIsFetching ] = useState(false);
+    const metaDataUrl: string = settings.paths.metaDataURL as string;
 
     useEffect(() => {
       const { labelStyle, polygonStyle, selectStyle, locationStyle } = MapStyles;
@@ -86,31 +89,63 @@ function MapComponent( { settings, url, controls, label }: Result ) {
         }
       });
   
-      map.on('click', (event: any): void => {
+      map.on('click', async (event: any): Promise<void> => {
         const feature = map.forEachFeatureAtPixel(event.pixel, (feature) => {
           return feature;
         });
         if (feature) {
-          const properties = feature.getProperties();
-          const { 
-            name,
-            url,
-            activities, 
-            'logo-url': logo, 
-            contact: email, 
-            description, 
-            'site-url': website  
-          } = properties;
-          const popupContent = {
-            name,
-            url,
-            description,
-            logo: logo?.thumb || logo || '',
-            activities,
-            email,
-            website,
-          }
-          setPopupContent(popupContent);
+            const properties = feature.getProperties();
+            const { 
+              name,
+              url,
+              activities, 
+              'logo-url': logo, 
+              contact: email, 
+              description, 
+              'site-url': website  
+            } = properties;
+            const popupContent = {
+              name,
+              url,
+              description,
+              logo: logo?.thumb || logo || '',
+              activities,
+              email,
+              website,
+            }
+            setPopupContent(popupContent);
+            
+            setIsFetching(true);
+            
+            const response = await fetch(
+              `${metaDataUrl}/${name}`
+            );
+            const data = await response.json();
+
+            if (data) {
+              const { 
+                area: {
+                  name,
+                  url,
+                  activities, 
+                  'logo-url': logo, 
+                  contact: email, 
+                  description, 
+                  'site-url': website
+                }
+              } = data;
+              const popupContent = {
+                name,
+                url,
+                description,
+                logo: logo?.thumb || logo || '',
+                activities,
+                email,
+                website,
+              }
+              setIsFetching(false);
+              setPopupContent(popupContent);
+            }
 
         } else {
           setPopupContent({});
@@ -138,46 +173,53 @@ function MapComponent( { settings, url, controls, label }: Result ) {
         <div id="popup">
           {popupContent.name && (
             <div className="popup-container">
-              <div className="popup-close" onClick={ () => setPopupContent({}) } ></div>
-              <div className="popup-heading">
-                  {popupContent.logo && (
-                    <div className="popup-logo">
-                      <img src={ popupContent.logo.replace("http://", "https://") } alt={popupContent.name} />
-                    </div>
-                  )}
-                  <div className="popup-name">
-                      <h2 style={{ color: 'rgb(' + settings.style.headlineRGB + ')' }}>{popupContent.name}</h2>
-                  </div>
-              </div>
-              <div className="popup-content" style={{ color: 'rgb(' + settings.style.textRGB + ')' }}>
-                  {popupContent.description && (<p className="popup-desc" dangerouslySetInnerHTML={{ __html: popupContent.description }} />)}
-                  {popupContent.activities && (
-                      <div className="popup-activities">
-                          <div className="popup-ctext"><b>Aktivitäten:</b><br />{popupContent.activities.join(', ')}</div>
+                <div className="popup-close" onClick={ () => setPopupContent({}) } ></div>
+                <div className="popup-heading">
+                    {popupContent.logo && (
+                      <div className="popup-logo">
+                        <img src={ popupContent.logo.replace("http://", "https://") } alt={popupContent.name} />
                       </div>
-                  )}
-                  {(popupContent.email || popupContent.website) && (
-                    <div className="popup-contact">
-                      <div className="popup-mail">
-                          <div className="popup-icon"><Icons title={ popupContent.email } type="mail" /></div>
-                          <div className="popup-ctext">{popupContent.email}</div>
-                      </div>
-                      <div className="popup-website">
-                          <div className="popup-icon"><Icons title={ popupContent.website } type="link" /></div>
-                          <div className="popup-ctext">
-                              <a href={popupContent.website} target="_blank">{popupContent.website}</a>
-                          </div>
-                      </div>
+                    )}
+                    <div className="popup-name">
+                        <h2 style={{ color: 'rgb(' + settings.style.headlineRGB + ')' }}>{popupContent.name}</h2>
                     </div>
-                  )}
-                  {(popupContent.url) && (
-                    <div className="popup-url">
-                      <span>
-                        <a href={popupContent.url} target="_top">DIMB Website</a>
-                      </span>
-                    </div>
-                  )}
-              </div>
+                </div>
+                { isFetching && <LoadSpinner display='Lade Daten' /> }
+                <div className="popup-content" style={{ color: 'rgb(' + settings.style.textRGB + ')' }}>
+                    {popupContent.description && (<p className="popup-desc" dangerouslySetInnerHTML={{ __html: popupContent.description }} />)}
+                    {popupContent.activities && popupContent.activities[0] !== '' && (
+                        <div className="popup-activities">
+                            <div className="popup-ctext"><b>Aktivitäten:</b><br />{popupContent.activities.join(', ')}</div>
+                        </div>
+                    )}
+                    {(popupContent.email || popupContent.website) && (
+                      <div className="popup-contact">
+                        { popupContent.email &&
+                            <div className="popup-mail">
+                                <div className="popup-icon"><Icons title={ popupContent.email } type="mail" /></div>
+                                <div className="popup-ctext">
+                                    <a href={'mailto:' + popupContent.email}>{popupContent.email}</a>
+                                </div>
+                            </div>
+                        }
+                        { popupContent.website &&
+                            <div className="popup-website">
+                                <div className="popup-icon"><Icons title={ popupContent.website } type="link" /></div>
+                                <div className="popup-ctext">
+                                    <a href={popupContent.website} target="_blank">{popupContent.website}</a>
+                                </div>
+                            </div>
+                        }
+                      </div>
+                    )}
+                    {(popupContent.url) && (
+                      <div className="popup-url">
+                        <span>
+                          <a href={popupContent.url} target="_top">DIMB Website</a>
+                        </span>
+                      </div>
+                    )}
+                </div>
             </div>
           )}
         </div>
