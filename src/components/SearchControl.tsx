@@ -10,8 +10,8 @@ class SearchControl extends Control {
 
     constructor(locationFeature: Feature, paths: any) {
       const button = document.createElement('button');
-      button.innerHTML = '&#128269;';
-      
+      button.className= 'search-button';
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth=2.5 stroke="var(--ol-foreground-color)" className="lens-icon"><path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>';     
       const input = document.createElement('input');
       input.id = 'search-box';
       input.value = '';
@@ -19,10 +19,10 @@ class SearchControl extends Control {
       input.style.float = 'left';
       input.style.margin = '1px';
       input.style.width = '75px';
-      input.style.height = '2.05em';
       input.style.padding = '5px';
   
       const element = document.createElement('div');
+      element.id = 'search-container';
       element.className = 'ol-unselectable ol-control search';
       element.style.left = '3.5em';
       element.style.top = '0.5em';
@@ -43,18 +43,23 @@ class SearchControl extends Control {
     handleSearch = (e: any) => {
       if (e.key === 'Enter' || e.type === 'click') {
         const pcode = (document.getElementById('search-box') as HTMLInputElement).value;
-        fetch(`${this.paths.apiBaseUrl}/api/postcodes/${pcode}`)
-          .then(function (response) {
-            return response.json();
-          })
-          .then((json) => {
-            const { geo_point_2d: { lat, lon } } = json;
-            const coordinate = fromLonLat([lon, lat], 'EPSG:3857');
-            this.getMap()?.getView().setCenter(coordinate);
-            this.getMap()?.getView().setZoom(9);
-            (document.getElementById('search-box') as HTMLInputElement).value = '';
-            this.locationFeature.setGeometry(new Point(coordinate));
-          });
+        if (pcode) {
+            fetch(`${this.paths.apiBaseUrl}/api/postcodes/${pcode}`)
+              .then(function (response) {
+                if (!response.ok) {
+                    console.log('%c *** Could not fetch postcode: ' + pcode + ' ***', 'color: #FFBF00');
+                }
+                return response.json();                
+              })
+              .then((json) => {
+                const { geo_point_2d: { lat, lon } } = json;
+                const coordinate = fromLonLat([lon, lat], 'EPSG:3857');
+                this.getMap()?.getView().setCenter(coordinate);
+                this.getMap()?.getView().setZoom(9);
+                (document.getElementById('search-box') as HTMLInputElement).value = '';
+                this.locationFeature.setGeometry(new Point(coordinate));
+              });
+        }
       }
     };
   }

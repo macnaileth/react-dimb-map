@@ -6,6 +6,7 @@
     top: 0.5em;
     right: 0.5em;  
     width: 50%;
+    height: 90%;
 }
 .popup-container {
     background-color: #fff;
@@ -52,6 +53,10 @@
 .popup-name h2 {
     font-size: 1rem;
 }  
+.popup-content {
+    overflow-y: scroll;
+    height: 85%;    
+}
 #popup .popup-ctext, #popup .popup-desc {
     font-size: 0.75rem;
 }
@@ -71,8 +76,28 @@
     opacity: 0.5;
 }
 
-.ol-control button {
-    font-size: 1.5em !important;
+#search-container button {
+    font-size: 1.0em !important;
+    margin-left: -27px;
+    
+}
+#search-container button:focus, 
+#search-container button:hover {
+    outline-style:none;
+    outline: none;
+    box-shadow: none;
+    border: none;
+}
+
+#search-container {
+    display: flex;
+    align-items: center;
+    height: 2rem;    
+}
+.search-button:hover {
+    cursor: pointer;
+    padding: 0.15rem;
+    background-color: rgba(128, 128, 128, 0.25);
 }
 
 /* X-Small devices (portrait phones, less than 576px) */
