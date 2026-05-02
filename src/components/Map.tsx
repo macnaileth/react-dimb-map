@@ -11,6 +11,8 @@ import GeolocationControl from './GeolocationControl';
 import SearchControl from './SearchControl';
 import LoadSpinner from './LoadSpinner';
 
+import DOMPurify from 'dompurify';
+
 
 interface Result {
     settings: any;
@@ -194,7 +196,7 @@ function MapComponent( { settings, url, controls, label }: Result ) {
                       {popupContent.description && (
                         <div className="popup-description">
                           <b>Beschreibung:</b><br />
-                          <span className="popup-desc" dangerouslySetInnerHTML={{ __html: popupContent.description }} />
+                          <span className="popup-desc" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(popupContent.description, { USE_PROFILES: { html: true } })}} />
                         </div>
                       )}
                       {popupContent.activities && (
