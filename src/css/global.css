@@ -55,7 +55,8 @@
 }  
 .popup-content {
     overflow-y: scroll;
-    height: 85%;    
+    height: 80%;
+    margin-top: 1rem;
 }
 #popup .popup-ctext, #popup .popup-desc {
     font-size: 0.75rem;

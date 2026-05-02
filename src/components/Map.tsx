@@ -27,6 +27,7 @@ interface PopupContent {
     email?: string;
     website?: string;
     activities?: string[];
+    extent?: string;
 }
 
 function MapComponent( { settings, url, controls, label }: Result ) {
@@ -102,7 +103,8 @@ function MapComponent( { settings, url, controls, label }: Result ) {
               'logo-url': logo, 
               contact: email, 
               description, 
-              'site-url': website  
+              'site-url': website,
+              'data-extent': extent  
             } = properties;
             const popupContent = {
               name,
@@ -112,6 +114,7 @@ function MapComponent( { settings, url, controls, label }: Result ) {
               activities,
               email,
               website,
+              extent
             }
             setPopupContent(popupContent);
             
@@ -120,7 +123,7 @@ function MapComponent( { settings, url, controls, label }: Result ) {
             const response = await fetch(
               `${metaDataUrl}/${name}`
             );
-            const data = await response.json();
+            const data = await response.json();           
 
             if (data) {
               const { 
@@ -131,7 +134,8 @@ function MapComponent( { settings, url, controls, label }: Result ) {
                   'logo-url': logo, 
                   contact: email, 
                   description, 
-                  'site-url': website
+                  'site-url': website,
+                  'data-extent': extent
                 }
               } = data;
               const popupContent = {
@@ -142,7 +146,9 @@ function MapComponent( { settings, url, controls, label }: Result ) {
                 activities,
                 email,
                 website,
+                extent
               }
+              console.log( 'extent:', popupContent );
               setIsFetching(false);
               setPopupContent(popupContent);
             }
@@ -165,8 +171,6 @@ function MapComponent( { settings, url, controls, label }: Result ) {
       };
     }, [url, controls, label, settings]);
 
-    //console.log( 'content:', popupContent );
-
     return (
       <div className={ "map-container" + ( settings.addClasses === '' ? '' : ' ' + settings.addClasses ) }>
         <div id="map" style={{ height: settings.height + 'px' }} />
@@ -185,41 +189,54 @@ function MapComponent( { settings, url, controls, label }: Result ) {
                     </div>
                 </div>
                 { isFetching && <LoadSpinner display='Lade Daten' /> }
-                <div className="popup-content" style={{ color: 'rgb(' + settings.style.textRGB + ')' }}>
-                    {popupContent.description && (<p className="popup-desc" dangerouslySetInnerHTML={{ __html: popupContent.description }} />)}
-                    {popupContent.activities && popupContent.activities[0] !== '' && (
-                        <div className="popup-activities">
-                            <div className="popup-ctext"><b>Aktivitäten:</b><br />{popupContent.activities.join(', ')}</div>
+                { popupContent.extent === "full" ?
+                  <div className="popup-content" style={{ color: 'rgb(' + settings.style.textRGB + ')' }}>
+                      {popupContent.description && (
+                        <div className="popup-description">
+                          <b>Beschreibung:</b><br />
+                          <span className="popup-desc" dangerouslySetInnerHTML={{ __html: popupContent.description }} />
                         </div>
-                    )}
-                    {(popupContent.email || popupContent.website) && (
-                      <div className="popup-contact">
-                        { popupContent.email &&
-                            <div className="popup-mail">
-                                <div className="popup-icon"><Icons title={ popupContent.email } type="mail" /></div>
-                                <div className="popup-ctext">
-                                    <a href={'mailto:' + popupContent.email}>{popupContent.email}</a>
-                                </div>
-                            </div>
-                        }
-                        { popupContent.website &&
-                            <div className="popup-website">
-                                <div className="popup-icon"><Icons title={ popupContent.website } type="link" /></div>
-                                <div className="popup-ctext">
-                                    <a href={popupContent.website} target="_blank">{popupContent.website}</a>
-                                </div>
-                            </div>
-                        }
-                      </div>
-                    )}
-                    {(popupContent.url) && (
-                      <div className="popup-url">
-                        <span>
-                          <a href={popupContent.url} target="_top">DIMB Website</a>
-                        </span>
-                      </div>
-                    )}
-                </div>
+                      )}
+                      {popupContent.activities && (
+                          <div className="popup-activities">
+                              <div className="popup-ctext"><b>Aktivitäten:</b><br />
+                              { popupContent.activities[0] !== '' ? popupContent.activities.join(', ') : <i>Keine Aktivitäten angegeben.</i> }
+                              </div>
+                          </div>
+                      )}
+                      {(popupContent.email || popupContent.website) && (
+                        <div className="popup-contact">
+                          { popupContent.email &&
+                              <div className="popup-mail">
+                                  <div className="popup-icon"><Icons title={ popupContent.email } type="mail" /></div>
+                                  <div className="popup-ctext">
+                                      <a href={'mailto:' + popupContent.email}>{popupContent.email}</a>
+                                  </div>
+                              </div>
+                          }
+                          { popupContent.website &&
+                              <div className="popup-website">
+                                  <div className="popup-icon"><Icons title={ popupContent.website } type="link" /></div>
+                                  <div className="popup-ctext">
+                                      <a href={popupContent.website} target="_blank">{popupContent.website}</a>
+                                  </div>
+                              </div>
+                          }
+                        </div>
+                      )}
+                      {(popupContent.url) && (
+                        <div className="popup-url">
+                          <span>
+                            <a href={popupContent.url} target="_top">DIMB Website</a>
+                          </span>
+                        </div>
+                      )}
+                  </div>
+                  :
+                  <div className="popup-content" style={{ color: 'rgb(' + settings.style.textRGB + ')' }}>
+                    <i>Keine weiteren Informationen zur IG verfügbar.</i>
+                  </div>
+                }
             </div>
           )}
         </div>
